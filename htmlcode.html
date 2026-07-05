@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Energy-Efficient Task Offloading | Sustainable IoT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { margin:0; font-family:'Segoe UI',Tahoma,sans-serif; background:#f4f6f9;}
+        header { background: linear-gradient(90deg, #2c3e50, #8e44ad); color:white; padding:20px; text-align:center;}
+        .container { display:grid; grid-template-columns:250px 1fr; min-height:100vh;}
+        .sidebar { background:#2c2f4a; color:white; padding:20px;}
+        .sidebar h3 { color:#f1c40f; margin-bottom: 20px;}
+        .sidebar button { width:100%; margin:10px 0; padding:12px; background:#3b3f6b; border:none; color:white; border-radius:8px; cursor:pointer; text-align: left; font-size: 14px;}
+        .sidebar button.active, .sidebar button:hover { background:#f1c40f; color:#2c2f4a; font-weight: bold;}
+        .content { padding:20px;}
+        .section { display:none;}
+        .section.active { display:block;}
+        .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;}
+        .card { background:white; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); font-weight: 500; text-align: center; color: #2c3e50;}
+        .form-section { background:white; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;}
+        .form-group { margin-bottom: 15px; }
+        input { width:100%; padding:10px; margin-top:5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;}
+        label { font-weight: bold; color: #333; display:block;}
+        .btn { margin-top:15px; padding:12px; width:100%; background:#8e44ad; color:white; border:none; border-radius:5px; font-size: 16px; cursor: pointer; transition: background 0.3s;}
+        .btn:hover { background:#f39c12;}
+        .result-card { margin-top: 20px; padding: 15px; border-radius: 8px; background: #eef2f7; border-left: 5px solid #8e44ad; display: none; }
+        .result-card h4 { margin: 0 0 10px 0; color: #2c3e50; }
+        canvas { margin-top:20px; max-height: 400px; background: white; padding: 15px; border-radius: 8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Energy-Efficient Task Offloading</h1>
+    <p>Wireless Powered Mobile Edge Computing for Sustainable IoT</p>
+</header>
+
+<div class="container">
+    <div class="sidebar">
+        <h3>Dashboard</h3>
+        <button class="active" onclick="showSection('overview', this)">System Overview</button>
+        <button onclick="showSection('offloading', this)">Task Offloading Control</button>
+        <button onclick="showSection('analytics', this)">Energy Analytics</button>
+        <button onclick="showSection('sustainability', this)">Sustainability Metrics</button>
+    </div>
+
+    <div class="content">
+        <div id="overview" class="section active">
+            <h2>System Architecture Layers</h2>
+            <div class="cards">
+                <div class="card">IoT &rarr; Edge &rarr; Cloud Layer Architecture</div>
+                <div class="card">Energy-Aware Task Scheduling</div>
+                <div class="card">Low Latency Decision Engine</div>
+                <div class="card">Sustainable IoT Infrastructure</div>
+            </div>
+        </div>
+
+        <div id="offloading" class="section">
+            <div class="form-section">
+                <h3>Task Allocation Controller</h3>
+                <div class="form-group">
+                    <label for="task_size">Task Size (KB)</label>
+                    <input type="number" id="task_size" value="600">
+                </div>
+                <div class="form-group">
+                    <label for="cpu_cycles">CPU Cycles Required</label>
+                    <input type="number" id="cpu_cycles" value="1500">
+                </div>
+                <div class="form-group">
+                    <label for="network_latency">Network Transmission Latency (ms)</label>
+                    <input type="number" id="network_latency" value="60">
+                </div>
+                <div class="form-group">
+                    <label for="edge_latency">Edge Computing Execution Latency (ms)</label>
+                    <input type="number" id="edge_latency" value="25">
+                </div>
+                <button class="btn" onclick="runOffloading()">Run Offloading Decision</button>
+                
+                <div id="result" class="result-card"></div>
+            </div>
+        </div>
+
+        <div id="analytics" class="section">
+            <h2>Energy Consumption Analysis</h2>
+            <canvas id="energyChart"></canvas>
+        </div>
+
+        <div id="sustainability" class="section">
+            <h2>Environmental Impact Optimization</h2>
+            <canvas id="sustainChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Module switching logic
+    function showSection(id, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    // AJAX Endpoint calling function
+    function runOffloading() {
+        const payload = {
+            task_size: document.getElementById('task_size').value,
+            cpu_cycles: document.getElementById('cpu_cycles').value,
+            network_latency: document.getElementById('network_latency').value,
+            edge_latency: document.getElementById('edge_latency').value
+        };
+
+        fetch("/offload", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            const resultBox = document.getElementById('result');
+            resultBox.style.display = "block";
+            if(data.error) {
+                resultBox.innerHTML = `<h4 style="color:red;">Error</h4><p>${data.error}</p>`;
+            } else {
+                resultBox.innerHTML = `
+                    <h4>Decision Outcome: ${data.decision}</h4>
+                    <p><strong>Computed Energy Overhead:</strong> ${data.energy} Joules</p>
+                    <p><strong>Total Cumulative Delay:</strong> ${data.latency} ms</p>
+                `;
+            }
+        })
+        .catch(err => {
+            console.error("Transmission Error:", err);
+        });
+    }
+
+    /* Initialize Evaluation Data Visualizations */
+    window.onload = function() {
+        // Line chart representing energy tradeoffs across processing options
+        new Chart(document.getElementById('energyChart'), {
+            type: 'line',
+            data: {
+                labels: ['Local Device Execution', 'Edge Server Offload', 'Cloud Server Processing'],
+                datasets: [{
+                    label: 'Energy Consumption (Relative Value Metrics)',
+                    data: [90, 45, 70],
+                    borderColor: '#8e44ad',
+                    backgroundColor: 'rgba(142, 68, 173, 0.1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        // Bar chart displaying sustainability enhancements
+        new Chart(document.getElementById('sustainChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Traditional Infrastructure (Without MEC)', 'Proposed Strategy (With Wireless Powered MEC)'],
+                datasets: [{
+                    label: 'Carbon Footprint Reduction Efficiency (%)',
+                    data: [30, 65],
+                    backgroundColor: ['#2c3e50', '#f1c40f']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+</script>
+</body>
+</html>
